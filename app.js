@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path'); //Node module that provides utilities for working with file and directory paths. https://nodejs.org/api/path.html#path
 const mongoose = require('mongoose');
+const ejsMate = require('ejs-mate')
 const Campground = require('./models/campground');
 const methodOverride = require('method-override');
 
@@ -14,7 +15,7 @@ db.once("open", () => {
 
 const app = express();
 
-
+app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs'); //tells Express to use ejs as the view engine
 app.set('views', path.join(__dirname, 'views')); //tells Express to use the /views folder in the project directory
 
