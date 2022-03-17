@@ -16,7 +16,7 @@ const CampgroundSchema = new Schema({
     ]
 });
 
-// Post Middleware to remove associated reviews from database when deleting a campground
+// Post Middleware to remove associated reviews from database when deleting a campground.  doc is automatically passed in as the document we just deleted
 CampgroundSchema.post('findOneAndDelete', async function (doc) {
     if (doc) {
         await Review.deleteMany({
