@@ -1,25 +1,12 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true }); //Had to add mergeParams: true after we split the review routes into their own separate router.  This is because express likes to keep params separate, and we didn't have access to the campground ID.
-
 const Campground = require('../models/campground');
 const Review = require('../models/review');
-
-const { reviewSchema } = require('../schemas.js');
-
-
 const catchAsync = require('../utils/catchAsync');
-const ExpressError = require('../utils/ExpressError');
+const { validateReview } = require('../middleware')
 
-// Server-side form validation for review entry
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+
+
 
 
 // Create Route: Add a review to a campground

@@ -50,8 +50,10 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser()); //serializing refers to storing and unstoring a user in a session
 passport.deserializeUser(User.deserializeUser());
 
-app.use((req, res, next) => {
+app.use((req, res, next) => { //we have access to these 'locals' in every single template
   //make sure this comes before route handlers
+  // console.log(req.session)
+  res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
