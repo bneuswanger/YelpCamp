@@ -26,7 +26,16 @@ const seedDB = async () => {
             author: '62349bd3792d6d402f039d9e',
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
-            image: 'https://source.unsplash.com/collection/483251',
+            images: [
+                {
+                    url: 'https://res.cloudinary.com/dktwpnsqc/image/upload/v1647741112/YelpCamp/txb72jonv7j99if2xinh.jpg',
+                    filename: 'YelpCamp/txb72jonv7j99if2xinh',
+                },
+                {
+                    url: 'https://res.cloudinary.com/dktwpnsqc/image/upload/v1647741113/YelpCamp/pcuvr94ilcct0cydtomx.jpg',
+                    filename: 'YelpCamp/pcuvr94ilcct0cydtomx',
+                }
+            ],
             description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Repudiandae accusantium reiciendis nobis, deserunt voluptatum libero incidunt molestias aspernatur itaque omnis, quam nesciunt optio in quo recusandae voluptatibus placeat nulla exercitationem.',
             price
         });

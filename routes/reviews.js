@@ -2,32 +2,17 @@ const express = require('express')
 const router = express.Router({ mergeParams: true }); //Had to add mergeParams: true after we split the review routes into their own separate router.  This is because express likes to keep params separate, and we didn't have access to the campground ID.
 const Campground = require('../models/campground');
 const Review = require('../models/review');
+const reviews = require('../controllers/reviews')
 const catchAsync = require('../utils/catchAsync');
-const { validateReview } = require('../middleware')
-
-
+const { validateReview, isLoggedIn, isReviewAuthor } = require('../middleware')
 
 
 
 // Create Route: Add a review to a campground
-router.post('/', validateReview, catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = new Review(req.body.review);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    req.flash('success', 'Created new review!')
-    res.redirect(`/campgrounds/${campground._id}`);
-}));
-
+router.post('/', isLoggedIn, validateReview, catchAsync(reviews.createReview));
 
 // Delete Route: Delete Reviews associated with a deleted campground (requires middleware specified in campground.js)
-router.delete('/:reviewId', catchAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-    req.flash('success', 'Successfully deleted review.')
-    res.redirect(`/campgrounds/${id}`);
-}))
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(reviews.deleteReview))
+
 
 module.exports = router;
