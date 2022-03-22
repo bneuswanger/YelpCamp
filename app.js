@@ -8,6 +8,8 @@ const mongoose = require("mongoose");
 const ejsMate = require("ejs-mate");
 const flash = require("connect-flash");
 const session = require("express-session");
+
+const MongoDBStore = require('connect-mongo')(session);
 const ExpressError = require("./utils/ExpressError");
 const methodOverride = require("method-override"); //allows put/patch/delete etc. from HTML; modifieds POST method
 const passport = require("passport");
@@ -17,9 +19,9 @@ const mongoSanitize = require('express-mongo-sanitize');
 const userRoutes = require("./routes/users");
 const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
-const dbUrl = process.env.DB_URL;
-//"mongodb://localhost:27017/yelp-camp"
-mongoose.connect("mongodb://localhost:27017/yelp-camp"); //Colt had 3 options set to true here (useNewUrlParser, useCreateIndex and useUnifiedTopology) but they are no longer necessary with the current version of Express
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
+
+mongoose.connect(dbUrl); //Colt had 3 options set to true here (useNewUrlParser, useCreateIndex and useUnifiedTopology) but they are no longer necessary with the current version of Express
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -36,10 +38,22 @@ app.set("views", path.join(__dirname, "views")); //tells Express to use the /vie
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); //this tells Express to use anything in the public folder
-const sessionConfig = {
-  name: 'session', //if not set, a default will apply that is easily trolled for by hackers. not trying to hide this, just not leave it as default
-  secret: "thisshouldbeabettersecret", //this will change at production time
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!'
+const store = new MongoDBStore({
+  url: dbUrl,
+  secret,
+  touchAfter: 24 * 60 * 60 //this is in seconds
+})
+
+store.on('error', function (e) {
+  console.log('Session Store Error', e)
+})
+
+const sessionConfig = {
+  store,
+  name: 'session', //if not set, a default will apply that is easily trolled for by hackers. not trying to hide this, just not leave it as default
+  secret,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -50,6 +64,8 @@ const sessionConfig = {
   },
 };
 app.use(session(sessionConfig)); //this needs to come before app.use(passport.session())
+
+
 app.use(flash());
 app.use(mongoSanitize());
 
