@@ -13,6 +13,7 @@ const methodOverride = require("method-override"); //allows put/patch/delete etc
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
+const mongoSanitize = require('express-mongo-sanitize');
 
 const userRoutes = require("./routes/users");
 const campgroundRoutes = require("./routes/campgrounds");
@@ -36,17 +37,21 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); //this tells Express to use anything in the public folder
 const sessionConfig = {
+  name: 'session', //if not set, a default will apply that is easily trolled for by hackers. not trying to hide this, just not leave it as default
   secret: "thisshouldbeabettersecret", //this will change at production time
+
   resave: false,
   saveUninitialized: true,
   cookie: {
     httpOnly: true, //security measure, although this seems to be the default now
+    // secure: true, //if true, this cookie will only work over https.  BREAKs locally b/c localhost is not https.  Use this for production mode
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 };
 app.use(session(sessionConfig)); //this needs to come before app.use(passport.session())
 app.use(flash());
+app.use(mongoSanitize());
 
 app.use(passport.initialize());
 app.use(passport.session());
