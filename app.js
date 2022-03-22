@@ -14,11 +14,11 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 const mongoSanitize = require('express-mongo-sanitize');
-
 const userRoutes = require("./routes/users");
 const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
-
+const dbUrl = process.env.DB_URL;
+//"mongodb://localhost:27017/yelp-camp"
 mongoose.connect("mongodb://localhost:27017/yelp-camp"); //Colt had 3 options set to true here (useNewUrlParser, useCreateIndex and useUnifiedTopology) but they are no longer necessary with the current version of Express
 
 const db = mongoose.connection;
@@ -53,6 +53,7 @@ app.use(session(sessionConfig)); //this needs to come before app.use(passport.se
 app.use(flash());
 app.use(mongoSanitize());
 
+
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -66,12 +67,6 @@ app.use((req, res, next) => { //we have access to these 'locals' in every single
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
-});
-
-app.get("/fakeUser", async (req, res) => {
-  const user = new User({ email: "bryan@gmail.com", username: "bryan" });
-  const newUser = await User.register(user, "keenai12");
-  res.send(newUser);
 });
 
 app.use("/", userRoutes);
